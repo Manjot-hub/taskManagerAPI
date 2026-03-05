@@ -1,0 +1,1347 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>TaskFlow</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Syne:wght@400;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      *,
+      *::before,
+      *::after {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+
+      :root {
+        --bg: #0e0e11;
+        --surface: #16161a;
+        --surface2: #1e1e24;
+        --border: #2a2a33;
+        --accent: #7c6aff;
+        --accent-dim: #7c6aff22;
+        --green: #3ecf8e;
+        --yellow: #f5a623;
+        --red: #ff5f57;
+        --text: #e8e8f0;
+        --text-dim: #7a7a90;
+        --radius: 12px;
+      }
+
+      body {
+        font-family: "Syne", sans-serif;
+        background: var(--bg);
+        color: var(--text);
+        min-height: 100vh;
+        overflow-x: hidden;
+      }
+
+      /* ── AUTH SCREEN ── */
+      #auth-screen {
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 24px;
+        background:
+          radial-gradient(ellipse at 60% 20%, #7c6aff18 0%, transparent 60%),
+          radial-gradient(ellipse at 20% 80%, #3ecf8e10 0%, transparent 50%),
+          var(--bg);
+      }
+
+      .auth-card {
+        width: 100%;
+        max-width: 420px;
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 20px;
+        padding: 40px;
+        animation: slideUp 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+      }
+
+      @keyframes slideUp {
+        from {
+          opacity: 0;
+          transform: translateY(24px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      .auth-logo {
+        font-size: 28px;
+        font-weight: 800;
+        letter-spacing: -1px;
+        margin-bottom: 8px;
+      }
+
+      .auth-logo span {
+        color: var(--accent);
+      }
+
+      .auth-subtitle {
+        color: var(--text-dim);
+        font-size: 14px;
+        margin-bottom: 32px;
+        font-family: "DM Mono", monospace;
+      }
+
+      .tab-row {
+        display: flex;
+        gap: 4px;
+        background: var(--surface2);
+        border-radius: 10px;
+        padding: 4px;
+        margin-bottom: 28px;
+      }
+
+      .tab-btn {
+        flex: 1;
+        padding: 10px;
+        border: none;
+        border-radius: 8px;
+        background: transparent;
+        color: var(--text-dim);
+        font-family: "Syne", sans-serif;
+        font-size: 14px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.2s;
+      }
+
+      .tab-btn.active {
+        background: var(--accent);
+        color: #fff;
+      }
+
+      .field {
+        margin-bottom: 16px;
+      }
+
+      label {
+        display: block;
+        font-size: 12px;
+        font-weight: 600;
+        color: var(--text-dim);
+        margin-bottom: 6px;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        font-family: "DM Mono", monospace;
+      }
+
+      input,
+      select,
+      textarea {
+        width: 100%;
+        background: var(--surface2);
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        padding: 12px 14px;
+        color: var(--text);
+        font-family: "DM Mono", monospace;
+        font-size: 14px;
+        outline: none;
+        transition: border-color 0.2s;
+      }
+
+      input:focus,
+      select:focus,
+      textarea:focus {
+        border-color: var(--accent);
+      }
+
+      select option {
+        background: var(--surface2);
+      }
+
+      .btn {
+        width: 100%;
+        padding: 13px;
+        border: none;
+        border-radius: var(--radius);
+        background: var(--accent);
+        color: #fff;
+        font-family: "Syne", sans-serif;
+        font-size: 15px;
+        font-weight: 700;
+        cursor: pointer;
+        transition:
+          opacity 0.2s,
+          transform 0.1s;
+        margin-top: 8px;
+      }
+
+      .btn:hover {
+        opacity: 0.88;
+      }
+      .btn:active {
+        transform: scale(0.98);
+      }
+      .btn.secondary {
+        background: var(--surface2);
+        color: var(--text);
+        border: 1px solid var(--border);
+      }
+
+      .msg {
+        font-size: 13px;
+        font-family: "DM Mono", monospace;
+        padding: 10px 14px;
+        border-radius: 8px;
+        margin-top: 12px;
+        display: none;
+      }
+
+      .msg.error {
+        background: #ff5f5715;
+        color: var(--red);
+        border: 1px solid #ff5f5730;
+      }
+      .msg.success {
+        background: #3ecf8e15;
+        color: var(--green);
+        border: 1px solid #3ecf8e30;
+      }
+      .msg.show {
+        display: block;
+      }
+
+      /* ── APP SCREEN ── */
+      #app-screen {
+        display: none;
+        min-height: 100vh;
+      }
+
+      .topbar {
+        height: 60px;
+        background: var(--surface);
+        border-bottom: 1px solid var(--border);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0 28px;
+        position: sticky;
+        top: 0;
+        z-index: 100;
+      }
+
+      .topbar-logo {
+        font-size: 20px;
+        font-weight: 800;
+        letter-spacing: -0.5px;
+      }
+
+      .topbar-logo span {
+        color: var(--accent);
+      }
+
+      .topbar-right {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+      }
+
+      .username-badge {
+        font-family: "DM Mono", monospace;
+        font-size: 13px;
+        color: var(--text-dim);
+        background: var(--surface2);
+        padding: 6px 12px;
+        border-radius: 20px;
+        border: 1px solid var(--border);
+      }
+
+      .logout-btn {
+        padding: 7px 16px;
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        background: transparent;
+        color: var(--text-dim);
+        font-family: "Syne", sans-serif;
+        font-size: 13px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.2s;
+      }
+
+      .logout-btn:hover {
+        border-color: var(--red);
+        color: var(--red);
+      }
+
+      .main {
+        max-width: 900px;
+        margin: 0 auto;
+        padding: 36px 24px;
+      }
+
+      .page-header {
+        display: flex;
+        align-items: flex-end;
+        justify-content: space-between;
+        margin-bottom: 28px;
+        flex-wrap: wrap;
+        gap: 16px;
+      }
+
+      .page-title {
+        font-size: 32px;
+        font-weight: 800;
+        letter-spacing: -1px;
+      }
+
+      .page-title span {
+        color: var(--accent);
+      }
+
+      .stats-row {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+      }
+
+      .stat-pill {
+        font-family: "DM Mono", monospace;
+        font-size: 12px;
+        padding: 5px 12px;
+        border-radius: 20px;
+        border: 1px solid var(--border);
+        color: var(--text-dim);
+      }
+
+      .stat-pill.pending {
+        border-color: #f5a62340;
+        color: var(--yellow);
+        background: #f5a62310;
+      }
+      .stat-pill.in_progress {
+        border-color: #7c6aff40;
+        color: var(--accent);
+        background: #7c6aff10;
+      }
+      .stat-pill.completed {
+        border-color: #3ecf8e40;
+        color: var(--green);
+        background: #3ecf8e10;
+      }
+
+      /* create form */
+      .create-form {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 16px;
+        padding: 24px;
+        margin-bottom: 28px;
+        animation: slideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+      }
+
+      .create-form h3 {
+        font-size: 16px;
+        font-weight: 700;
+        margin-bottom: 18px;
+        color: var(--text-dim);
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+        font-family: "DM Mono", monospace;
+      }
+
+      .form-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 12px;
+      }
+
+      .form-grid .full {
+        grid-column: 1 / -1;
+      }
+
+      .form-actions {
+        display: flex;
+        gap: 10px;
+        margin-top: 4px;
+      }
+      .form-actions .btn {
+        margin-top: 0;
+      }
+
+      /* filters */
+      .filters {
+        display: flex;
+        gap: 10px;
+        margin-bottom: 20px;
+        flex-wrap: wrap;
+        align-items: center;
+      }
+
+      .filter-input {
+        flex: 1;
+        min-width: 180px;
+        padding: 9px 14px;
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        color: var(--text);
+        font-family: "DM Mono", monospace;
+        font-size: 13px;
+        outline: none;
+      }
+
+      .filter-input:focus {
+        border-color: var(--accent);
+      }
+
+      .filter-select {
+        padding: 9px 14px;
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        color: var(--text);
+        font-family: "DM Mono", monospace;
+        font-size: 13px;
+        outline: none;
+        cursor: pointer;
+        width: auto;
+      }
+
+      /* task list */
+      .tasks-list {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+      }
+
+      .task-card {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 14px;
+        padding: 18px 20px;
+        display: flex;
+        align-items: flex-start;
+        gap: 16px;
+        transition:
+          border-color 0.2s,
+          transform 0.15s;
+        animation: slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+      }
+
+      .task-card:hover {
+        border-color: #3a3a4a;
+        transform: translateY(-1px);
+      }
+
+      .task-check {
+        width: 20px;
+        height: 20px;
+        border-radius: 50%;
+        border: 2px solid var(--border);
+        cursor: pointer;
+        flex-shrink: 0;
+        margin-top: 2px;
+        transition: all 0.2s;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .task-check.done {
+        background: var(--green);
+        border-color: var(--green);
+      }
+
+      .task-check.done::after {
+        content: "✓";
+        color: #fff;
+        font-size: 11px;
+        font-weight: 700;
+      }
+
+      .task-body {
+        flex: 1;
+        min-width: 0;
+      }
+
+      .task-title {
+        font-size: 15px;
+        font-weight: 700;
+        margin-bottom: 4px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+
+      .task-title.done {
+        text-decoration: line-through;
+        color: var(--text-dim);
+      }
+
+      .task-desc {
+        font-family: "DM Mono", monospace;
+        font-size: 12px;
+        color: var(--text-dim);
+        margin-bottom: 10px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+
+      .task-meta {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+        align-items: center;
+      }
+
+      .badge {
+        font-family: "DM Mono", monospace;
+        font-size: 11px;
+        padding: 3px 9px;
+        border-radius: 20px;
+        font-weight: 500;
+      }
+
+      .badge.status-pending {
+        background: #f5a62318;
+        color: var(--yellow);
+      }
+      .badge.status-in_progress {
+        background: #7c6aff18;
+        color: var(--accent);
+      }
+      .badge.status-completed {
+        background: #3ecf8e18;
+        color: var(--green);
+      }
+      .badge.priority-low {
+        background: #3ecf8e10;
+        color: var(--green);
+      }
+      .badge.priority-medium {
+        background: #f5a62310;
+        color: var(--yellow);
+      }
+      .badge.priority-high {
+        background: #ff5f5710;
+        color: var(--red);
+      }
+
+      .due-date {
+        font-family: "DM Mono", monospace;
+        font-size: 11px;
+        color: var(--text-dim);
+        margin-left: auto;
+      }
+
+      .task-actions {
+        display: flex;
+        gap: 6px;
+        flex-shrink: 0;
+      }
+
+      .icon-btn {
+        width: 32px;
+        height: 32px;
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        background: transparent;
+        color: var(--text-dim);
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 14px;
+        transition: all 0.2s;
+      }
+
+      .icon-btn:hover.edit {
+        border-color: var(--accent);
+        color: var(--accent);
+      }
+      .icon-btn:hover.delete {
+        border-color: var(--red);
+        color: var(--red);
+      }
+
+      /* edit inline */
+      .task-edit-form {
+        background: var(--surface2);
+        border: 1px solid var(--accent);
+        border-radius: 14px;
+        padding: 18px 20px;
+        animation: slideUp 0.2s ease;
+      }
+
+      .empty-state {
+        text-align: center;
+        padding: 60px 20px;
+        color: var(--text-dim);
+      }
+
+      .empty-state .icon {
+        font-size: 40px;
+        margin-bottom: 12px;
+      }
+      .empty-state p {
+        font-family: "DM Mono", monospace;
+        font-size: 14px;
+      }
+
+      .add-task-btn {
+        width: auto;
+        padding: 10px 20px;
+        font-size: 14px;
+      }
+
+      .pagination {
+        display: flex;
+        justify-content: center;
+        gap: 8px;
+        margin-top: 28px;
+      }
+
+      .page-btn {
+        padding: 8px 16px;
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        background: var(--surface);
+        color: var(--text);
+        font-family: "DM Mono", monospace;
+        font-size: 13px;
+        cursor: pointer;
+        transition: all 0.2s;
+      }
+
+      .page-btn:hover,
+      .page-btn.active {
+        border-color: var(--accent);
+        color: var(--accent);
+      }
+      .page-btn:disabled {
+        opacity: 0.3;
+        cursor: not-allowed;
+      }
+
+      .loader {
+        text-align: center;
+        padding: 40px;
+        color: var(--text-dim);
+        font-family: "DM Mono", monospace;
+        font-size: 13px;
+      }
+
+      @media (max-width: 600px) {
+        .form-grid {
+          grid-template-columns: 1fr;
+        }
+        .page-title {
+          font-size: 24px;
+        }
+        .topbar {
+          padding: 0 16px;
+        }
+        .main {
+          padding: 20px 16px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <!-- AUTH SCREEN -->
+    <div id="auth-screen">
+      <div class="auth-card">
+        <div class="auth-logo">Task<span>Flow</span></div>
+        <div class="auth-subtitle">// manage your work, simply.</div>
+
+        <div class="tab-row">
+          <button class="tab-btn active" onclick="switchTab('login')">
+            Login
+          </button>
+          <button class="tab-btn" onclick="switchTab('register')">
+            Register
+          </button>
+        </div>
+
+        <!-- Login Form -->
+        <div id="login-form">
+          <div class="field">
+            <label>Username</label>
+            <input
+              type="text"
+              id="login-username"
+              placeholder="your_username"
+            />
+          </div>
+          <div class="field">
+            <label>Password</label>
+            <input type="password" id="login-password" placeholder="••••••••" />
+          </div>
+          <button class="btn" onclick="login()">Login →</button>
+          <div style="text-align: right; margin-top: 10px">
+            <span
+              onclick="showForgotPassword()"
+              style="
+                font-family: &quot;DM Mono&quot;, monospace;
+                font-size: 12px;
+                color: var(--accent);
+                cursor: pointer;
+              "
+              >Forgot password?</span
+            >
+          </div>
+          <div class="msg" id="login-msg"></div>
+        </div>
+
+        <!-- Register Form -->
+        <div id="register-form" style="display: none">
+          <div class="field">
+            <label>Username</label>
+            <input
+              type="text"
+              id="reg-username"
+              placeholder="choose_username"
+            />
+          </div>
+          <div class="field">
+            <label>Email</label>
+            <input type="email" id="reg-email" placeholder="you@example.com" />
+          </div>
+          <div class="field">
+            <label>Password</label>
+            <input
+              type="password"
+              id="reg-password"
+              placeholder="min 8 characters"
+            />
+          </div>
+          <button class="btn" onclick="register()">Create Account →</button>
+          <div class="msg" id="reg-msg"></div>
+        </div>
+        <!-- Forgot Password Form -->
+        <div id="forgot-form" style="display: none">
+          <div class="field">
+            <label>Email</label>
+            <input
+              type="email"
+              id="forgot-email"
+              placeholder="your@email.com"
+            />
+          </div>
+          <button class="btn" onclick="requestPasswordReset()">
+            Send Reset Link →
+          </button>
+          <div class="msg" id="forgot-msg"></div>
+          <div style="text-align: center; margin-top: 16px">
+            <span
+              onclick="switchTab('login')"
+              style="
+                font-family: &quot;DM Mono&quot;, monospace;
+                font-size: 12px;
+                color: var(--text-dim);
+                cursor: pointer;
+              "
+              >← Back to login</span
+            >
+          </div>
+        </div>
+
+        <!-- Reset Password Form -->
+        <div id="reset-form" style="display: none">
+          <div class="field">
+            <label>New Password</label>
+            <input
+              type="password"
+              id="reset-password"
+              placeholder="min 8 characters"
+            />
+          </div>
+          <button class="btn" onclick="confirmPasswordReset()">
+            Reset Password →
+          </button>
+          <div class="msg" id="reset-msg"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- APP SCREEN -->
+    <div id="app-screen">
+      <div class="topbar">
+        <div class="topbar-logo">Task<span>Flow</span></div>
+        <div class="topbar-right">
+          <div class="username-badge" id="username-display"></div>
+          <button class="logout-btn" onclick="logout()">Logout</button>
+        </div>
+      </div>
+
+      <div class="main">
+        <div class="page-header">
+          <div>
+            <div class="page-title">Your <span>Tasks</span></div>
+          </div>
+          <div
+            style="
+              display: flex;
+              gap: 10px;
+              align-items: center;
+              flex-wrap: wrap;
+            "
+          >
+            <div class="stats-row" id="stats-row"></div>
+            <button class="btn add-task-btn" onclick="toggleCreateForm()">
+              + New Task
+            </button>
+          </div>
+        </div>
+
+        <!-- Create Form -->
+        <div class="create-form" id="create-form" style="display: none">
+          <h3>// new task</h3>
+          <div class="form-grid">
+            <div class="field full">
+              <label>Title</label>
+              <input
+                type="text"
+                id="new-title"
+                placeholder="What needs to be done?"
+              />
+            </div>
+            <div class="field full">
+              <label>Description</label>
+              <input
+                type="text"
+                id="new-desc"
+                placeholder="Optional details..."
+              />
+            </div>
+            <div class="field">
+              <label>Status</label>
+              <select id="new-status">
+                <option value="pending">Pending</option>
+                <option value="in_progress">In Progress</option>
+                <option value="completed">Completed</option>
+              </select>
+            </div>
+            <div class="field">
+              <label>Priority</label>
+              <select id="new-priority">
+                <option value="low">Low</option>
+                <option value="medium" selected>Medium</option>
+                <option value="high">High</option>
+              </select>
+            </div>
+            <div class="field">
+              <label>Due Date</label>
+              <input type="date" id="new-due" />
+            </div>
+          </div>
+          <div class="form-actions">
+            <button
+              class="btn"
+              style="width: auto; padding: 10px 24px"
+              onclick="createTask()"
+            >
+              Create Task
+            </button>
+            <button
+              class="btn secondary"
+              style="width: auto; padding: 10px 20px"
+              onclick="toggleCreateForm()"
+            >
+              Cancel
+            </button>
+          </div>
+          <div class="msg" id="create-msg"></div>
+        </div>
+
+        <!-- Filters -->
+        <div class="filters">
+          <input
+            class="filter-input"
+            type="text"
+            id="search-input"
+            placeholder="🔍  Search tasks..."
+            oninput="debounceSearch()"
+          />
+          <select
+            class="filter-select"
+            onchange="applyFilters()"
+            id="filter-status"
+          >
+            <option value="">All Status</option>
+            <option value="pending">Pending</option>
+            <option value="in_progress">In Progress</option>
+            <option value="completed">Completed</option>
+          </select>
+          <select
+            class="filter-select"
+            onchange="applyFilters()"
+            id="filter-priority"
+          >
+            <option value="">All Priority</option>
+            <option value="low">Low</option>
+            <option value="medium">Medium</option>
+            <option value="high">High</option>
+          </select>
+        </div>
+
+        <!-- Task List -->
+        <div id="tasks-container"></div>
+
+        <!-- Pagination -->
+        <div class="pagination" id="pagination"></div>
+      </div>
+    </div>
+
+    <script>
+      const API = "http://127.0.0.1:8000/api/v1";
+      let accessToken = localStorage.getItem("access") || "";
+      let refreshToken = localStorage.getItem("refresh") || "";
+      let currentUser = localStorage.getItem("username") || "";
+      let currentPage = 1;
+      let searchTimeout = null;
+      let editingId = null;
+
+      // ── INIT ──
+      if (accessToken) showApp();
+
+      const urlParams = new URLSearchParams(window.location.search);
+      if (urlParams.get("uid") && urlParams.get("token")) {
+        document.getElementById("login-form").style.display = "none";
+        document.getElementById("reset-form").style.display = "block";
+        document
+          .querySelectorAll(".tab-btn")
+          .forEach((b) => b.classList.remove("active"));
+      }
+
+      // ── AUTH ──
+      function switchTab(tab) {
+        document
+          .querySelectorAll(".tab-btn")
+          .forEach((b, i) =>
+            b.classList.toggle("active", tab === "login" ? i === 0 : i === 1),
+          );
+        document.getElementById("login-form").style.display =
+          tab === "login" ? "block" : "none";
+        document.getElementById("register-form").style.display =
+          tab === "register" ? "block" : "none";
+        document.getElementById("forgot-form").style.display = "none";
+        document.getElementById("reset-form").style.display = "none";
+      }
+
+      async function login() {
+        const username = document.getElementById("login-username").value.trim();
+        const password = document.getElementById("login-password").value;
+        const msg = document.getElementById("login-msg");
+        if (!username || !password)
+          return showMsg(msg, "error", "Please fill in all fields.");
+        try {
+          const res = await fetch(`${API}/token/`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ username, password }),
+          });
+          const data = await res.json();
+          if (!res.ok)
+            return showMsg(msg, "error", data.detail || "Login failed.");
+          accessToken = data.access;
+          refreshToken = data.refresh;
+          currentUser = username;
+          localStorage.setItem("access", accessToken);
+          localStorage.setItem("refresh", refreshToken);
+          localStorage.setItem("username", username);
+          showApp();
+        } catch {
+          showMsg(msg, "error", "Could not connect to server.");
+        }
+      }
+
+      async function register() {
+        const username = document.getElementById("reg-username").value.trim();
+        const email = document.getElementById("reg-email").value.trim();
+        const password = document.getElementById("reg-password").value;
+        const msg = document.getElementById("reg-msg");
+        if (!username || !password)
+          return showMsg(msg, "error", "Username and password required.");
+        try {
+          const res = await fetch(`${API}/register/`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ username, email, password }),
+          });
+          const data = await res.json();
+          if (!res.ok)
+            return showMsg(msg, "error", JSON.stringify(data.message || data));
+          showMsg(msg, "success", "Account created! Please login.");
+          setTimeout(() => switchTab("login"), 1200);
+        } catch {
+          showMsg(msg, "error", "Could not connect to server.");
+        }
+      }
+
+      function logout() {
+        localStorage.clear();
+        accessToken = refreshToken = currentUser = "";
+        document.getElementById("app-screen").style.display = "none";
+        document.getElementById("auth-screen").style.display = "flex";
+      }
+
+      // ── APP ──
+      function showApp() {
+        document.getElementById("auth-screen").style.display = "none";
+        document.getElementById("app-screen").style.display = "block";
+        document.getElementById("username-display").textContent =
+          `@${currentUser}`;
+        loadTasks();
+      }
+
+      async function authFetch(url, options = {}) {
+        options.headers = {
+          ...options.headers,
+          Authorization: `Bearer ${accessToken}`,
+          "Content-Type": "application/json",
+        };
+        let res = await fetch(url, options);
+        if (res.status === 401) {
+          // try refresh
+          const r = await fetch(`${API}/token/refresh/`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ refresh: refreshToken }),
+          });
+          if (r.ok) {
+            const d = await r.json();
+            accessToken = d.access;
+            localStorage.setItem("access", accessToken);
+            options.headers["Authorization"] = `Bearer ${accessToken}`;
+            res = await fetch(url, options);
+          } else {
+            logout();
+            return null;
+          }
+        }
+        return res;
+      }
+
+      async function loadTasks(page = 1) {
+        currentPage = page;
+        const container = document.getElementById("tasks-container");
+        container.innerHTML = '<div class="loader">loading tasks...</div>';
+
+        const search = document.getElementById("search-input")?.value || "";
+        const status = document.getElementById("filter-status")?.value || "";
+        const priority =
+          document.getElementById("filter-priority")?.value || "";
+
+        let url = `${API}/tasks/?page=${page}`;
+        if (search) url += `&search=${encodeURIComponent(search)}`;
+        if (status) url += `&status=${status}`;
+        if (priority) url += `&priority=${priority}`;
+
+        const res = await authFetch(url);
+        if (!res) return;
+        const data = await res.json();
+        renderTasks(data);
+      }
+
+      function renderTasks(data) {
+        const container = document.getElementById("tasks-container");
+        const tasks = data.results || [];
+
+        // stats
+        updateStats(tasks);
+
+        if (tasks.length === 0) {
+          container.innerHTML = `<div class="empty-state"><div class="icon">📋</div><p>No tasks found. Create one above!</p></div>`;
+          document.getElementById("pagination").innerHTML = "";
+          return;
+        }
+
+        container.innerHTML = "";
+        const list = document.createElement("div");
+        list.className = "tasks-list";
+
+        tasks.forEach((task) => {
+          if (editingId === task.id) {
+            list.appendChild(renderEditForm(task));
+          } else {
+            list.appendChild(renderTaskCard(task));
+          }
+        });
+
+        container.appendChild(list);
+        renderPagination(data);
+      }
+
+      function renderTaskCard(task) {
+        const card = document.createElement("div");
+        card.className = "task-card";
+        card.id = `task-${task.id}`;
+        const isDone = task.status === "completed";
+        card.innerHTML = `
+            <div class="task-check ${isDone ? "done" : ""}" onclick="toggleComplete(${task.id}, '${task.status}')"></div>
+            <div class="task-body">
+                <div class="task-title ${isDone ? "done" : ""}">${escHtml(task.title)}</div>
+                ${task.description ? `<div class="task-desc">${escHtml(task.description)}</div>` : ""}
+                <div class="task-meta">
+                    <span class="badge status-${task.status}">${task.status.replace("_", " ")}</span>
+                    <span class="badge priority-${task.priority}">${task.priority}</span>
+                    ${task.due_date ? `<span class="due-date">due ${task.due_date}</span>` : ""}
+                </div>
+            </div>
+            <div class="task-actions">
+                <button class="icon-btn edit" onclick="startEdit(${task.id})" title="Edit">✏️</button>
+                <button class="icon-btn delete" onclick="deleteTask(${task.id})" title="Delete">🗑️</button>
+            </div>
+        `;
+        return card;
+      }
+
+      function renderEditForm(task) {
+        const wrap = document.createElement("div");
+        wrap.className = "task-edit-form";
+        wrap.id = `task-${task.id}`;
+        wrap.innerHTML = `
+            <div class="form-grid">
+                <div class="field full">
+                    <label>Title</label>
+                    <input type="text" id="edit-title-${task.id}" value="${escHtml(task.title)}" />
+                </div>
+                <div class="field full">
+                    <label>Description</label>
+                    <input type="text" id="edit-desc-${task.id}" value="${escHtml(task.description || "")}" />
+                </div>
+                <div class="field">
+                    <label>Status</label>
+                    <select id="edit-status-${task.id}">
+                        <option value="pending" ${task.status === "pending" ? "selected" : ""}>Pending</option>
+                        <option value="in_progress" ${task.status === "in_progress" ? "selected" : ""}>In Progress</option>
+                        <option value="completed" ${task.status === "completed" ? "selected" : ""}>Completed</option>
+                    </select>
+                </div>
+                <div class="field">
+                    <label>Priority</label>
+                    <select id="edit-priority-${task.id}">
+                        <option value="low" ${task.priority === "low" ? "selected" : ""}>Low</option>
+                        <option value="medium" ${task.priority === "medium" ? "selected" : ""}>Medium</option>
+                        <option value="high" ${task.priority === "high" ? "selected" : ""}>High</option>
+                    </select>
+                </div>
+                <div class="field">
+                    <label>Due Date</label>
+                    <input type="date" id="edit-due-${task.id}" value="${task.due_date || ""}" />
+                </div>
+            </div>
+            <div class="form-actions" style="margin-top:12px;">
+                <button class="btn" style="width:auto;padding:9px 20px;" onclick="saveEdit(${task.id})">Save</button>
+                <button class="btn secondary" style="width:auto;padding:9px 16px;" onclick="cancelEdit()">Cancel</button>
+            </div>
+        `;
+        return wrap;
+      }
+
+      function updateStats(tasks) {
+        const counts = { pending: 0, in_progress: 0, completed: 0 };
+        tasks.forEach((t) => (counts[t.status] = (counts[t.status] || 0) + 1));
+        document.getElementById("stats-row").innerHTML = `
+            <span class="stat-pill pending">${counts.pending} pending</span>
+            <span class="stat-pill in_progress">${counts.in_progress} in progress</span>
+            <span class="stat-pill completed">${counts.completed} done</span>
+        `;
+      }
+
+      function renderPagination(data) {
+        const pg = document.getElementById("pagination");
+        pg.innerHTML = "";
+        if (!data.next && !data.previous) return;
+        if (data.previous) {
+          const btn = document.createElement("button");
+          btn.className = "page-btn";
+          btn.textContent = "← Prev";
+          btn.onclick = () => loadTasks(currentPage - 1);
+          pg.appendChild(btn);
+        }
+        const info = document.createElement("span");
+        info.style.cssText =
+          "font-family:DM Mono,monospace;font-size:13px;color:var(--text-dim);padding:8px 12px;";
+        info.textContent = `page ${currentPage}`;
+        pg.appendChild(info);
+        if (data.next) {
+          const btn = document.createElement("button");
+          btn.className = "page-btn";
+          btn.textContent = "Next →";
+          btn.onclick = () => loadTasks(currentPage + 1);
+          pg.appendChild(btn);
+        }
+      }
+
+      // ── TASK ACTIONS ──
+      async function createTask() {
+        const title = document.getElementById("new-title").value.trim();
+        const msg = document.getElementById("create-msg");
+        if (!title) return showMsg(msg, "error", "Title is required.");
+        const body = {
+          title,
+          description: document.getElementById("new-desc").value,
+          status: document.getElementById("new-status").value,
+          priority: document.getElementById("new-priority").value,
+          due_date: document.getElementById("new-due").value || null,
+        };
+        const res = await authFetch(`${API}/tasks/`, {
+          method: "POST",
+          body: JSON.stringify(body),
+        });
+        if (!res) return;
+        if (res.ok) {
+          showMsg(msg, "success", "Task created!");
+          document.getElementById("new-title").value = "";
+          document.getElementById("new-desc").value = "";
+          document.getElementById("new-due").value = "";
+          setTimeout(() => {
+            toggleCreateForm();
+            loadTasks(currentPage);
+          }, 600);
+        } else {
+          const d = await res.json();
+          showMsg(msg, "error", JSON.stringify(d.message || d));
+        }
+      }
+
+      async function deleteTask(id) {
+        if (!confirm("Delete this task?")) return;
+        const res = await authFetch(`${API}/tasks/${id}/`, {
+          method: "DELETE",
+        });
+        if (res && res.ok) loadTasks(currentPage);
+      }
+
+      async function toggleComplete(id, currentStatus) {
+        const newStatus =
+          currentStatus === "completed" ? "pending" : "completed";
+        const res = await authFetch(`${API}/tasks/${id}/`, {
+          method: "PATCH",
+          body: JSON.stringify({ status: newStatus }),
+        });
+        if (res && res.ok) loadTasks(currentPage);
+      }
+
+      function startEdit(id) {
+        editingId = id;
+        loadTasks(currentPage);
+      }
+
+      function cancelEdit() {
+        editingId = null;
+        loadTasks(currentPage);
+      }
+
+      async function saveEdit(id) {
+        const body = {
+          title: document.getElementById(`edit-title-${id}`).value.trim(),
+          description: document.getElementById(`edit-desc-${id}`).value,
+          status: document.getElementById(`edit-status-${id}`).value,
+          priority: document.getElementById(`edit-priority-${id}`).value,
+          due_date: document.getElementById(`edit-due-${id}`).value || null,
+        };
+        if (!body.title) return alert("Title is required.");
+        const res = await authFetch(`${API}/tasks/${id}/`, {
+          method: "PUT",
+          body: JSON.stringify(body),
+        });
+        if (res && res.ok) {
+          editingId = null;
+          loadTasks(currentPage);
+        }
+      }
+
+      function toggleCreateForm() {
+        const form = document.getElementById("create-form");
+        form.style.display = form.style.display === "none" ? "block" : "none";
+      }
+
+      function applyFilters() {
+        loadTasks(1);
+      }
+
+      function debounceSearch() {
+        clearTimeout(searchTimeout);
+        searchTimeout = setTimeout(() => loadTasks(1), 400);
+      }
+
+      // ── UTILS ──
+      function showMsg(el, type, text) {
+        el.className = `msg ${type} show`;
+        el.textContent = text;
+        if (type === "success")
+          setTimeout(() => el.classList.remove("show"), 3000);
+      }
+
+      function escHtml(str) {
+        return String(str)
+          .replace(/&/g, "&amp;")
+          .replace(/</g, "&lt;")
+          .replace(/>/g, "&gt;")
+          .replace(/"/g, "&quot;");
+      }
+
+      function showForgotPassword() {
+        document.getElementById("login-form").style.display = "none";
+        document.getElementById("register-form").style.display = "none";
+        document.getElementById("forgot-form").style.display = "block";
+        document.getElementById("reset-form").style.display = "none";
+        document
+          .querySelectorAll(".tab-btn")
+          .forEach((b) => b.classList.remove("active"));
+      }
+
+      async function requestPasswordReset() {
+        const email = document.getElementById("forgot-email").value.trim();
+        const msg = document.getElementById("forgot-msg");
+        if (!email) return showMsg(msg, "error", "Please enter your email.");
+        try {
+          const res = await fetch(`${API}/password-reset/`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ email }),
+          });
+          const data = await res.json();
+          if (!res.ok)
+            return showMsg(msg, "error", JSON.stringify(data.message || data));
+          showMsg(msg, "success", "Reset link sent! Check your email.");
+        } catch {
+          showMsg(msg, "error", "Could not connect to server.");
+        }
+      }
+
+      async function confirmPasswordReset() {
+        const params = new URLSearchParams(window.location.search);
+        const uid = params.get("uid");
+        const token = params.get("token");
+        const new_password = document.getElementById("reset-password").value;
+        const msg = document.getElementById("reset-msg");
+        if (!new_password)
+          return showMsg(msg, "error", "Please enter a new password.");
+        try {
+          const res = await fetch(`${API}/password-reset/confirm/`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ uid, token, new_password }),
+          });
+          const data = await res.json();
+          if (!res.ok)
+            return showMsg(msg, "error", JSON.stringify(data.message || data));
+          showMsg(msg, "success", "Password reset! Redirecting to login...");
+          setTimeout(() => {
+            window.history.replaceState({}, "", "/");
+            switchTab("login");
+          }, 1500);
+        } catch {
+          showMsg(msg, "error", "Could not connect to server.");
+        }
+      }
+    </script>
+  </body>
+</html>
