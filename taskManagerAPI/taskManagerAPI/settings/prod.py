@@ -1,4 +1,5 @@
 from .base import *
+import os
 
 DEBUG = False
 
@@ -15,3 +16,7 @@ X_FRAME_OPTIONS = 'DENY'
 # restrict CORS in production
 CORS_ALLOW_ALL_ORIGINS = False
 CORS_ALLOWED_ORIGINS = os.getenv('CORS_ALLOWED_ORIGINS', '').split(',')
+
+# static files
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+STATIC_URL = '/static/'
